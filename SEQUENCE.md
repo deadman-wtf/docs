@@ -98,10 +98,6 @@ sequenceDiagram
 
 ```mermaid
 ---
-```
-
-```mermaid
----
 title: Switch check-in
 ---
 sequenceDiagram

@@ -1,0 +1,14 @@
+Malicious actor/action rules:
+
+- Participants trying to release secret early
+- Participants backing out of protocol to lock secret last-minute
+- Multiple participants are the same person
+- Response to participants dipping below threshold
+
+Voting rules:
+
+- Vote someone out of the protocol
+- Vote for switch activation
+- Vote to prove sharebox
+- Vote to prove decrypted share ownership
+- Vote to reconstruct

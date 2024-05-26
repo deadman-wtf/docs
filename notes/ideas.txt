@@ -1,7 +1,6 @@
 Event log: Be able to build graphs of events from participant creation to the distribution of their secret for all members/actions
 Possible pub/sub architecture: There are many triggers/events that need to happen; also the scale able to be accomodated
 Use ZKP for auth?: HTTP Signature + ZKP at each signed request
-Use ZKP for shares?: Proof that share is for me, proof it came from the secret
 Votes data: Define a generic schema for different types of votes/multiple parameters. Build protocol
 Detecting malicious voting: Need to brainstorm on this
 Who can modify secret members on successful vote?
