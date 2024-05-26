@@ -1,0 +1,681 @@
+# TODO: Signature auth headers/logic
+
+openapi: 3.0.3
+info:
+  title: Deadman System of Record - OpenAPI 3.0
+  description: |-
+    This is the system-of-record backend API for deadman.wtf. With this API, you
+    may do CRUD operations on participants, secrets, invites, and operate the switch itself.
+  termsOfService: http://deadman.wtf/terms/
+  contact:
+    email: admin@deadman.wtf
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Deadman
+  url: http://deadman.wtf
+servers:
+  - url: '{environment}/v1'
+    variables:
+      environment:
+        default: http://localhost:8080    # Production server
+        enum:
+          - https://api.deadman.wtf         # Production server
+          - https://dev.api.deadman.wtf     # Development server
+          - http://localhost:8080
+tags:
+  - name: participant
+    description: Everything about participants of the protocol
+    externalDocs:
+      description: Find out more about participants in the protocol
+      url: https://deadman.wtf/terminology?q=participants
+  - name: secret
+    description: Everything related to secrets shared in the protocol
+    externalDocs:
+      description: Find out more about secrets in the protocol
+      url: https://deadman.wtf/terminology?q=secrets
+  - name: invite
+    description: Everything related to invites for a secret in the protocol
+    externalDocs:
+      description: Find out more about how invites work
+      url: https://deadman.wtf/terminology?q=invites
+  - name: share
+    description: Everything related to shares created for participants in the protocol
+    externalDocs:
+      description: Find out more about how distributed shares work
+      url: https://deadman.wtf/terminology?q=shares
+  - name: switch
+    description: Everything related to the operations of the switch (check-in, activation, etc.)
+    externalDocs:
+      description: Find out more about how the deadman's switch works
+      url: https://deadman.wtf/terminology?q=switch
+paths:
+  /participants:
+    # This is our registration endpoint. A client will create a keypair and send
+    # us the public key to be registered into the ability to use the protocol.
+    # TODO: DB/BE: Create a participant
+    post:
+      tags:
+        - participant
+      summary: Create a participant
+      description: Create a participant (dealer or trustee) by their public key
+      operationId: createParticipant
+      requestBody:
+        $ref: '#/components/requestBodies/CreateParticipantRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Participant'
+        '400':
+          description: Invalid input
+        '422':
+          description: Validation exception
+        '500':
+          description: Internal server error
+    # TODO: DB/BE: Get secret participants by secret ID (if a member) and filter by date ranges
+    get:
+      tags:
+        - participant
+      summary: Get participants
+      description: Get participants (by secret ID, by date ranges)
+      operationId: getParticipants
+      parameters:
+        - in: query
+          name: secretId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID of the secret
+        - in: query
+          name: start
+          schema:
+            type: string
+            format: 'date'
+        - in: query
+          name: end
+          schema:
+            type: string
+            format: 'date'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Participant'
+        '400':
+          description: Invalid input
+        '422':
+          description: Validation exception
+        '500':
+          description: Internal server error
+          
+  /participants/{id}:
+    # TODO: DB/BE: Update a participant (if you are that participant)
+    # TODO: DB: Create trigger on public key update to reencrypt shares  
+    # TODO: DB/BE Create trigger if participant leaves the protocol or is voted off to update
+    #       votes
+    patch:
+      tags:
+        - participant
+      summary: Update a participant in the protocol
+      description: Update a participant in the protocol
+      operationId: updateParticipant
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID of the participant
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateParticipantRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Participant'
+        '400':
+          description: Invalid input
+        '404':
+          description: Not found
+        '422':
+          description: Validation exception
+        '500':
+          description: Internal server error
+    get:
+      tags:
+        - participant
+      summary: Get a participant in the protocol
+      description: Get a participant in the protocol
+      operationId: getParticipant
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID of the participant
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Participant'
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+    # TODO: Create trigger on deletion to update secrets/shares/invites
+    delete:
+      tags:
+        - participant
+      summary: Delete a participant from the protocol
+      description: Delete a participant from the protocol
+      operationId: deleteParticipant
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID of the participant
+      responses:
+        '204':
+          description: 'Deleted, no content'
+        '404':
+          description: 'Not found'
+        '500':
+          description: 'Internal server error'
+  /secrets:
+    # This is our secret creation endpoint. A client will send us a HTTP Signature Auth'd
+    # request with the plaintext digest, (optional) expiration date, 
+    # us the public key to be registered into the ability to use the protocol.
+    # TODO: DB/BE: Create a participant
+    post:
+      tags:
+        - secret
+      summary: Create a secret
+      description: Create a secret
+      operationId: createSecret
+      requestBody:
+        $ref: '#/components/requestBodies/CreateSecretRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Secret'
+        '400':
+          description: Invalid input
+        '422':
+          description: Validation exception
+        '500':
+          description: Internal server error
+    # TODO: DB/BE: Get secret participants by secret ID (if a member) and filter by date ranges
+    get:
+      tags:
+        - secret
+      summary: Get secrets
+      description: Get secrets (by key ID (signature header) to only return those owned/member of), by date ranges)
+      operationId: getSecrets
+      parameters:
+        - in: query
+          name: start
+          schema:
+            type: string
+            format: 'date'
+        - in: query
+          name: end
+          schema:
+            type: string
+            format: 'date'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Secret'
+        '400':
+          description: Invalid input
+        '422':
+          description: Validation exception
+        '500':
+          description: Internal server error
+  /secrets/{id}:
+    # TODO: DB/BE: Update a secret (if you are the dealer
+    # TODO: DB/BE: Redistribute shares on any change to secret
+    patch:
+      tags:
+        - secret
+      summary: Update a secret in the protocol
+      description: Update a secret in the protocol
+      operationId: updateSecret
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID of the secret
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateSecretRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Secret'
+        '400':
+          description: Invalid input
+        '404':
+          description: Not found
+        '422':
+          description: Validation exception
+        '500':
+          description: Internal server error
+    get:
+      tags:
+        - secret
+      summary: Get a secret in the protocol
+      description: Get a secret in the protocol
+      operationId: getSecret
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID of the secret
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Secret'
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+    # TODO: Create trigger on deletion to update secrets/shares/invites
+    delete:
+      tags:
+        - secret
+      summary: Delete a secret from the protocol
+      description: Delete a secret from the protocol
+      operationId: deleteSecret
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID of the secret
+      responses:
+        '204':
+          description: 'Deleted, no content'
+        '404':
+          description: 'Not found'
+        '500':
+          description: 'Internal server error'
+  /secrets/{secretId}/invites:
+    # This is our secret creation endpoint. A client will send us a HTTP Signature Auth'd
+    # request with the plaintext digest, (optional) expiration date, 
+    # us the public key to be registered into the ability to use the protocol.
+    # TODO: DB/BE: Create a participant
+    # TODO:
+    post:
+      tags:
+        - secret
+        - invite
+      summary: Create a invite for a secret
+      description: Create a invite for a secret
+      operationId: createInvite
+      parameters:
+        - in: path
+          required: true
+          name: secretId
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/CreateInviteRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Invite'
+        '400':
+          description: Invalid input
+        '422':
+          description: Validation exception
+        '500':
+          description: Internal server error
+    # TODO: DB/BE: Get secret participants by secret ID (if a member) and filter by date ranges
+    get:
+      tags:
+        - secret
+        - invite
+      summary: Get invites
+      description: Get invites (by secret ID, date ranges)
+      operationId: getInvites
+      parameters:
+        - in: path
+          required: true
+          name: secretId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: start
+          schema:
+            type: string
+            format: 'date'
+        - in: query
+          name: end
+          schema:
+            type: string
+            format: 'date'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Secret'
+        '400':
+          description: Invalid input
+        '422':
+          description: Validation exception
+        '500':
+          description: Internal server error
+  /secrets/{secretId}/invites/{inviteId}/accept:
+    # TODO: Validate for required key to enter protocol
+    get:
+      tags:
+        - secret
+        - invite
+      summary: Get invites
+      description: Accept invite
+      operationId: acceptInvite
+      parameters:
+        - in: path
+          required: true
+          name: secretId
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          required: true
+          name: inviteId
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Secret'
+        '400':
+          description: Invalid input
+        '422':
+          description: Validation exception
+        '500':
+          description: Internal server error
+  /secrets/{id}/switch:
+      # This is our switch creation endpoint. A client will send us a HTTP Signature Auth'd
+    # request with the plaintext digest, (optional) expiration date, 
+    # us the public key to be registered into the ability to use the protocol.
+    # TODO: DB/BE: Create a participant
+    # TODO:
+    post:
+      tags:
+        - secret
+        - switch
+      summary: Create a switch instance for a secret
+      description: Create a invite for a secret
+      operationId: createSwitch
+      parameters:
+        - in: path
+          required: true
+          name: id
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        $ref: '#/components/requestBodies/CreateSwitchRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Switch'
+        '400':
+          description: Invalid input
+        '422':
+          description: Validation exception
+        '500':
+          description: Internal server error
+    # TODO: DB/BE: Get secret participants by secret ID (if a member) and filter by date ranges
+    # get:
+    # patch:
+ 
+components:
+  schemas:
+    Participant:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        publicKey:
+          type: string
+          # TODO: Validate this
+        created:
+          type: string
+          format: 'date-time'
+        updated:
+          type: string
+          format: 'date-time'
+        deleted:
+          type: string
+          format: 'date-time'
+    UpdateParticipantRequestMask:
+      type: string
+      enum:
+        - PUBLIC_KEY
+    Secret:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        created:
+          type: string
+          format: 'date-time'
+        updated:
+          type: string
+          format: 'date-time'
+        deleted:
+          type: string
+          format: 'date-time'
+        digest:
+          # TODO: Validate this
+          type: string
+        # TODO: Create trigger based on patch of secret/deletion of secret
+        exipry:
+          type: string
+          format: 'date-time'
+    MemberActionHolder:
+      properties:
+        id:
+          type: string
+          format: uuid
+        action:
+          $ref: '#/components/schemas/MemberAction'
+    MemberAction:
+      type: string
+      enum:
+        - REMOVE
+        - REMOVE_ALL
+    UpdateSecretRequestMask:
+      type: string
+      enum:
+        - DIGEST
+        - EXPIRY
+        - MEMBERS
+    Invite:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        created:
+          type: string
+          format: 'date-time'
+        updated:
+          type: string
+          format: 'date-time'
+        deleted:
+          type: string
+          format: 'date-time'
+        expiry:
+          type: string
+          format: 'date-time'
+    Switch:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        created:
+          type: string
+          format: 'date-time'
+        updated:
+          type: string
+          format: 'date-time'
+        state:
+          $ref: '#/components/schemas/SwitchState'
+    SwitchState:
+      type: string
+      enum:
+        - OPEN
+        - CLOSED
+        - HALF_OPEN
+  requestBodies:
+    CreateParticipantRequest:
+      description: Request to create a participant
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              publicKey:
+                type: string
+                #TODO: validate this
+    UpdateParticipantRequest:
+      description: Request object to update (patch) a participant
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              publicKey:
+                # TODO: Validate this
+                type: string
+              updateMask:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UpdateParticipantRequestMask'
+    CreateSecretRequest:
+      description: Request object to create a secret
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              publicKey:
+                # TODO: Validate this
+                type: string
+              digest:
+                # TODO: Validate this
+                type: string
+              expiry:
+                type: string
+                format: 'date-time'
+    UpdateSecretRequest:
+      description: Request object to update (patch) a secret
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              digest:
+                type: string
+              members:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MemberActionHolder'
+              updateMask:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/UpdateSecretRequestMask'
+    CreateInviteRequest:
+      description: Request object to create a new invite for a secret
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              digest:
+                type: string
+              expiry:
+                type: string
+                format: 'date-time'
+    CreateSwitchRequest:
+      description: Request object to create a new switch for a secret
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              state:
+                $ref: '#/components/schemas/SwitchState'

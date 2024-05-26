@@ -1,0 +1,8 @@
+/terms
+/terminology?q=
+/create-keys
+/accept-invite
+/create-secret
+/update-secret
+/secret
+

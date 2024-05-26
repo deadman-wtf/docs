@@ -1,0 +1,41 @@
+participants
+  id: uuid
+  created: date-time
+  updated: date-time
+  deleted: date-time
+  publicKey: hex
+  lastSeen: date-time
+switches:
+  id: uuid
+  created: date-time
+  updated: date-time
+  deleted: date-time
+  state: date-time
+  reason: string (attributable to event graph)
+secrets
+  id: uuid
+  created: date-time
+  updated: date-time
+  deleted: date-time
+  dealer: uuid references participants.id
+  digest: hex
+  expiry: date-time
+invites
+  id: uuid
+  created: date-time
+  deleted: date-time
+  acceptedBy: uuid references participants.id
+  expiry: date-time
+shares
+  id: uuid # secret.id/share.id will be BLOB key
+  created: date-time
+  updated: date-time
+  deleted: date-time # TODO: Backend move to cold storage in BLOB store
+  owner: uuid references participants.id
+votes
+  id: uuid
+  action: string
+  entity: string
+  numVotes: integer
+
+
