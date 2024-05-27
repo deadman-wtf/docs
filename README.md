@@ -13,4 +13,6 @@ projects, libraries, and processes.
 - [Mobile](./mobile/MOBILE.md)
 - [Web](./web/WEB.md)
 - [API](./api/API.md)
+- [Sensitive data](./SENSITIVE-DATA.md)
+- [Voting](./voting/VOTING.md)
 

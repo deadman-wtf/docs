@@ -148,6 +148,7 @@
   },
   "active": "1e36c408e5a418ed",
   "lastOpenFiles": [
+    "architecture/CACHEING.md",
     "data/UML.md",
     "data/sql/TCL.sql",
     "data/sql/TQL.sql",
@@ -182,7 +183,6 @@
     "libs/CRYPTO.md",
     "libs/COMMON.md",
     "web/VIEWS.md",
-    "mobile/BEHAVIORAL-AUTH.md",
-    "mobile/VIEWS.md"
+    "mobile/BEHAVIORAL-AUTH.md"
   ]
 }

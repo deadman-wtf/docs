@@ -7,18 +7,23 @@
 ### Terminology
 * `supervision` - when a user/agent wants to be monitored and actively has the deadman agent looking for deauthentication/triggers
 * `participant` - any entity involved in the protocol, this includes dealers and trustees; both human and not
+
 #### Users
 * `dealer` - the entity with a secret to be shared or with knowledge to be distributed upon failure to check in with the switch
 * `trustee` - the participants in the protocol that will receive the secret from the dealer
+
 #### Technical/detailed
 A dealer distributes a secret to `n` trustees by breaking apart the secret in a way that can only be reconstructed after the switch is triggered and a threshold number of shares are released for reconstruction. The participants of the protocol can prove the sharebox can be decrypted with their keys using a zero-knowledge proof. The participants in this protocol can be humans, or even machines. Participants are all participating to a publicly verifiable secret-sharing scheme. Again, the shares are signed. Each participant's share will be paired with a proof to verify ownership with math to uphold claims in a court of law. Any participant can verify 
 
 This service knows nothing about its users except the participants' public keys, data is end-to-end encrypted. To ensure all requests are verified from the specified user, they must use HTTP signature authentication. We can verify ownership of the request based on their signature which requires use of their private key - again, client-side. Again, within the math of the protocol - a zero-knowledge proof is used to verify the participant still knows their private key. All requests sent to clients will be signed as our authoritative service. 
+
 ### Context
 The problem this software aims to solve is getting information to necessary entities at end-of-life or upon compromise. A secure protocol is needed for this to happen. Furthermore, rigid math problems should define the validity of each message/transaction/participant.
 
 This project has several emergent sub-projects. The first is an agent for passive-behavioral-authentication from a mobile device. This will be a separate project and generic as I plan to sell a working implementation fintech and government agencies. The second will be an agent for machines that will trigger from indicators of compromise. This whole second project can become a second security company.
+
 ## Goals/non-goals
+
 ### Goals
 * Non-interactive switch activation via mobile agent or machine compromise agent.
 * Interactive voting between participants.
@@ -35,9 +40,11 @@ This project has several emergent sub-projects. The first is an agent for passiv
 * Stamp this evidence in the blockchain
 - SSR for Tor service - no JavaScript allowed
 - All private key interactions happen client-side
+
 ### Non-goals
 * Anything outside the goals described above
 * Disclosure of this until I figure out how to patent
+
 ### Milestones
 * Smoke-testable
 	* Raw net/http server or lightweight router like Chi stood up in Golang
@@ -104,6 +111,7 @@ This project has several emergent sub-projects. The first is an agent for passiv
 	- Hook into other IDS/IPS, etc.
 - Solidity contract to stamp event logs onto the blockchain
 - Hidden service with SSR
+
 ## Threat model
 * Protect participants from being able to know about each other
 * Protect from voting behavior that may indicate the group is trying to release the secret early
