@@ -7,6 +7,7 @@ projects, libraries, and processes.
 - [Threat Model](./THREAT-MODEL.md)
 - [Architecture](./architecture/ARCHITECTURE.md)
 - [Protocol](./protocol/PROTOCOL.md)
+- [Notifications](./NOTIFICATIONS.md)
 - [Rules](./rules/RULES.md)
 - [Data](./data/DATA.md)
 - [Libs](./libs/LIBS.md)
