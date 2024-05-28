@@ -1,6 +1,7 @@
 # Crypto
 
-The protocol makes heavy use of elliptic curve cryptography through several algorithms.
+The protocol makes heavy use of elliptic curve cryptography through several algorithms. There is
+"one key to rule them all" that is used from request signing, and the publicly verifiable secret sharing scheme.
 
 ### Publicly Verifiable Secret Sharing
 
@@ -18,4 +19,4 @@ For proving that you know a secret without revealing the secret - this protocol 
 
 ### HTTP Signature Auth
 
-For signing each request and verifying origins by private-key; the protcol uses HTTP signatures to/from the server for all operations outside of joining the platform. Your key is your authentication and we never want to know it. The ED25519 key gets passed from signature auth, to a query for your key identifier, your public key is then passed to the publicly verifiable secret sharing scheme for any operations or zero-knowledge-proofs. 
+For signing each request and verifying origins by private-key; the protcol uses HTTP signatures to/from the server for all operations outside of joining the platform. Your key is your authentication and we never want to know it. The P256 key gets passed from signature auth, to a query for your key identifier, your public key is then passed to the publicly verifiable secret sharing scheme for any operations or zero-knowledge-proofs. 
